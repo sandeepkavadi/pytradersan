@@ -11,7 +11,7 @@ def standardize_transactions(
 
     Args:
         platform (str): The trading platform (e.g., 'Schwab', 'Marcus').
-        account_name (str): Nick name of the account, to identify and differentiate (e.g. 'marc8208', 'schb5263').
+        account_name (str): Nick name of the account, to identify and differentiate (e.g. 'marc8208', 'schb576').
         transactions (pd.DataFrame): The transactions DataFrame.
 
     Returns:
@@ -60,7 +60,7 @@ def standardize_transactions(
         marcus["action"] = marcus["Transaction"].map(marcus_actions)
         marcus["date"] = pd.to_datetime(marcus["Date"])
         marcus["symbol"] = marcus["Desc"]
-        marcus["quantity"] = np.abs(marcus["Quantity"])
+        marcus["quantity"] = marcus["Quantity"]
         marcus["Credit"] = (
             marcus["Credit"].str.replace("$", "").str.replace(",", "").astype(float)
         )
