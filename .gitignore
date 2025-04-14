@@ -1,3 +1,4 @@
 data/*
 trading/*
 *.egg-info
+*/secrets/*
