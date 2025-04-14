@@ -14,3 +14,11 @@ repos:
     hooks:
     -   id: isort
         args: ["--profile=black"]
+-   repo: local
+    hooks:
+        - id: clear-jupyter-notebook-output
+          name: Clear Jupyter Notebook Output
+          files: \.ipynb$
+          stages: [commit]
+          language: system
+          entry: jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace
