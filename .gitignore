@@ -2,3 +2,4 @@ data/*
 trading/*
 *.egg-info
 */secrets/*
+.env
