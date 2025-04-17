@@ -1,6 +1,7 @@
 import json
 from collections import defaultdict
 
+import numpy as np
 import pandas as pd
 import requests
 
@@ -29,10 +30,6 @@ SCHWAB_API_TRANSACTION_TYPES = [
 API_COLUMN_MAPPER = {
     "tradeDate": "date",
     "accountNumber": "account",
-    "symbol": "symbol",
-    "action": "action",
-    "quantity": "quantity",
-    "price": "price",
     "netAmount": "amount",
 }
 
@@ -130,7 +127,8 @@ def parse_trades(transfer_items):
     instruments = [
         x for x in transfer_items if x["instrument"]["assetType"] != "CURRENCY"
     ]
-    assert len(instruments) == 1, f"Expected 1 instrument, got {len(instruments)}"
+    print(f"Number of instruments to process: {len(instruments)}")
+    assert len(instruments) == 1
     instrument = instruments[0]
     parsed_txns = {
         "symbol": instrument["instrument"]["symbol"],
@@ -139,3 +137,18 @@ def parse_trades(transfer_items):
         "asset": instrument["instrument"]["assetType"],
     }
     return parsed_txns
+
+
+def process_raw_trades(raw_trades):
+    trades = raw_trades.apply(lambda x: parse_trades(x["transferItems"]), axis=1).apply(
+        pd.Series
+    )
+    trades["price"] = trades["price"].astype(float)
+    trades["quantity"] = trades["quantity"].astype(float)
+    trades["action"] = np.where(trades["quantity"] > 0, "BUY", "SELL")
+    trades = trades.join(raw_trades.copy(deep=True).drop(columns=["transferItems"]))
+    trades = trades.rename(columns=API_COLUMN_MAPPER)
+    trades = trades[API_COLUMN_MAPPER.values()]
+    trades["date"] = pd.to_datetime(trades["date"]).dt.date
+    trades = trades.drop_duplicates()
+    return trades
