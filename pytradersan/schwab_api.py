@@ -127,7 +127,6 @@ def parse_trades(transfer_items):
     instruments = [
         x for x in transfer_items if x["instrument"]["assetType"] != "CURRENCY"
     ]
-    print(f"Number of instruments to process: {len(instruments)}")
     assert len(instruments) == 1
     instrument = instruments[0]
     parsed_txns = {
@@ -148,7 +147,7 @@ def process_raw_trades(raw_trades):
     trades["action"] = np.where(trades["quantity"] > 0, "BUY", "SELL")
     trades = trades.join(raw_trades.copy(deep=True).drop(columns=["transferItems"]))
     trades = trades.rename(columns=API_COLUMN_MAPPER)
-    trades = trades[API_COLUMN_MAPPER.values()]
+    trades = trades[constants.TRANSACTIONS_STANDARD_COLS]
     trades["date"] = pd.to_datetime(trades["date"]).dt.date
     trades = trades.drop_duplicates()
     return trades
